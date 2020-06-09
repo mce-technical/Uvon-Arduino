@@ -1,4 +1,4 @@
-
+///efeefeoejofjfeofjeofjeofeofjej
 #define power 12
 #define LEDS 8
 #define SSR1 7
@@ -95,7 +95,8 @@ void command()
 {
   if(stringComplete)
   {
-    Serial.print(inputString);
+    if(inputString[0] != 'S')
+      Serial.print(inputString);
     if(inputString[0] == 'M' && line == 0)// && strlen(inputString) == 12)
     {
       sscanf(inputString,"M%d,%d,%d,%d",&dirr,&speedr,&dirl,&speedl);
@@ -241,7 +242,7 @@ a1 = analogRead(A1);
 a2 = analogRead(A2);
 a3 = analogRead(A3);
 a4 = analogRead(A4);  
-#if 1 
+#if 0
   Serial.print(a0);
   Serial.print(" ");
   Serial.print(a1);
