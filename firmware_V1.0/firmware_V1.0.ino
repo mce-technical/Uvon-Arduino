@@ -26,14 +26,14 @@ int line = 0;
 
 int  i = 0;
 
-
+int b = 0;
 void send_to_rdriver(int id, int dir)
 {
   char buf[10];
   int first_byte = 235 - dir;//((235 >> 1) << 1) | dirr;
   int check_sum = first_byte ^ speedr;
   sprintf(buf,"%c%c%c",first_byte ,speedr,check_sum);
-  Serial2.print(buf);
+ // Serial2.print(buf);
   //Serial.print(speedr);
   delay(10);
 
