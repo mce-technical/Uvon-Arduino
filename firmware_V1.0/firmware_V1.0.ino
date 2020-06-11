@@ -1,4 +1,10 @@
 ///efeefeoejofjfeofjeofjeofeofjej
+
+
+#include "Ezo_uart.h"
+
+
+
 #define power 12
 #define LEDS 8
 #define SSR1 7
@@ -192,9 +198,9 @@ void command()
     else if(inputString[0] == 'S')
     {
       if(a0 > line_tresh && a1 > line_tresh && a2 < line_tresh && a3 < line_tresh && a4 < line_tresh)
-        Serial.println("1");
+        Serial.print("1\n");
       else 
-        Serial.println("0");
+        Serial.print("0\n");
     }
    // Serial.print("\n");
     i = 0;
