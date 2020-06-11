@@ -2,7 +2,7 @@
 
 
 #include <C:\Users\lenovo\Documents\Uvon-Arduino-STM32F103RTC6\firmware_V1.0\Ezo_uart.h>
-
+#include <stdio.h>
 
 
 #define power 12
@@ -99,6 +99,7 @@ void LineTracking()
 }
 void command()
 {
+  //Serial.println("ok");
   if(stringComplete)
   {
     if(inputString[0] != 'S')

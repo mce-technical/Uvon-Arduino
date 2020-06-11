@@ -22,7 +22,7 @@ SOFTWARE
 #define _EZO_UART_H_
 
 #if ARDUINO >= 100
-#include "Arduino.h"
+#include <Arduino.h>
 #else
 #include "WProgram.h"
 #endif

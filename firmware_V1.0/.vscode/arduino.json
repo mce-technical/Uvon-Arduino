@@ -1,6 +1,0 @@
-{
-    "board": "arduino:avr:mega",
-    "configuration": "cpu=atmega2560",
-    "programmer": "ArduinoISP",
-    "sketch": "firmware_V1.0.ino"
-}
