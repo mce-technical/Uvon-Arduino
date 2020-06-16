@@ -17,11 +17,35 @@ uint8_t Ezo_uart::data_available(){
 	return this->Serial_port.available();
 }
 
+bool Ezo_uart::init_module(int continuous_en,int ok_resp_en)
+{
+	char buf[10];
+	sprintf(buf,"c,%d",continuous_en);
+	send_cmd_no_resp(buf);
+	sprintf(buf,"*ok,%d",ok_resp_en);
+	send_cmd_no_resp(buf);
+	delay(100);
+	flush_rx_buffer();
+}
+
+void Ezo_uart::print_reading()
+{
+  if (send_read())
+  {                           
+    // Serial.print(get_name());                  
+    // Serial.print(": ");
+    Serial.println(this -> Reading.red);
+	Serial.println(this -> Reading.green);
+	Serial.println(this -> Reading.blue);               
+  }
+}
+
 bool Ezo_uart::send_read(){
 	char _sensordata[this->bufferlen];
-	if(send_cmd("r", _sensordata, this->bufferlen)){
+	if(send_cmd("R", _sensordata, this->bufferlen)){
 		if(strcmp(_sensordata, "*ER") != 0){
-			this->reading = atof(_sensordata);
+			//Serial.println(_sensordata);
+		    scanf(_sensordata,"%d,%d,%d",this -> Reading.red,this -> Reading.green,this -> Reading.blue);
 			return true;
 		}
 	}
@@ -33,7 +57,7 @@ bool Ezo_uart::send_read_with_temp_comp(float temperature){
 	char _sensordata[this->bufferlen];
 	if(send_cmd_with_num("rt,", _sensordata, this->bufferlen, temperature, 3)){
 		if(strcmp(_sensordata, "*ER") != 0){
-			this->reading = atof(_sensordata);
+			//this->reading = atof(_sensordata);
 			return true;
 		}
 	}
@@ -41,7 +65,7 @@ bool Ezo_uart::send_read_with_temp_comp(float temperature){
 }
 
 float Ezo_uart::get_reading(){
-	return this->reading;
+	//return this->reading;
 }
 
 void Ezo_uart::send_cmd_no_resp( const String& cmd){

@@ -24,7 +24,7 @@ SOFTWARE
 #if ARDUINO >= 100
 #include <Arduino.h>
 #else
-#include "WProgram.h"
+#include <WProgram.h>
 #endif
 
 class Ezo_uart{
@@ -36,6 +36,13 @@ class Ezo_uart{
 		
 		Ezo_uart(Stream& Serial_port, const char* name):Serial_port(Serial_port), name(name){}
 		//takes a stream object, which is usually a hardware or software serial port and a name string
+
+		bool init_module(int continuous_en,int ok_resp_en);
+		// disables or enables continuous mode 
+		// disables or enables ok response mode
+
+		void print_reading();
+		//This function prints Sensor readings in single mode
 		
 		bool send_read();
 		//sends the "R" command to the device and parses the response so its
@@ -80,12 +87,18 @@ class Ezo_uart{
 		//a passthrough for the serial port's available() function
 		
 	private:
-		float reading = 0;
+		//float reading = 0;
+		color Reading;
 		const char* name;
 		Stream& Serial_port;
-		const static uint8_t bufferlen = 32;
+		const static uint8_t bufferlen = 3;
 };
-
+ struct color
+ {
+	 int red;
+	 int green;
+	 int blue;
+ };
 
 
 #endif
