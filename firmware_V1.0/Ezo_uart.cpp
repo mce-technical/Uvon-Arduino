@@ -2,6 +2,8 @@
 
 #include <C:\Users\lenovo\Documents\Uvon-Arduino-STM32F103RTC6\firmware_V1.0\Ezo_uart.h>   
 
+color Reading;
+
 
 const char* Ezo_uart::get_name(){
 	return this->name;
@@ -34,9 +36,9 @@ void Ezo_uart::print_reading()
   {                           
     // Serial.print(get_name());                  
     // Serial.print(": ");
-    Serial.println(this -> Reading.red);
-	Serial.println(this -> Reading.green);
-	Serial.println(this -> Reading.blue);               
+    Serial.println(Reading.red);
+	Serial.println(Reading.green);
+	Serial.println(Reading.blue);               
   }
 }
 
@@ -45,7 +47,7 @@ bool Ezo_uart::send_read(){
 	if(send_cmd("R", _sensordata, this->bufferlen)){
 		if(strcmp(_sensordata, "*ER") != 0){
 			//Serial.println(_sensordata);
-		    scanf(_sensordata,"%d,%d,%d",this -> Reading.red,this -> Reading.green,this -> Reading.blue);
+		    scanf(_sensordata,"%d,%d,%d",Reading.red,Reading.green,Reading.blue);
 			return true;
 		}
 	}

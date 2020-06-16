@@ -37,6 +37,8 @@ class Ezo_uart{
 		Ezo_uart(Stream& Serial_port, const char* name):Serial_port(Serial_port), name(name){}
 		//takes a stream object, which is usually a hardware or software serial port and a name string
 
+		
+
 		bool init_module(int continuous_en,int ok_resp_en);
 		// disables or enables continuous mode 
 		// disables or enables ok response mode
@@ -88,7 +90,7 @@ class Ezo_uart{
 		
 	private:
 		//float reading = 0;
-		color Reading;
+		
 		const char* name;
 		Stream& Serial_port;
 		const static uint8_t bufferlen = 3;
