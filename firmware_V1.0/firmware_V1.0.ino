@@ -1,14 +1,16 @@
+
 ///efeefeoejofjfeofjeofjeofeofjej
 
-
-#include <C:\Users\lenovo\Documents\Uvon-Arduino-STM32F103RTC6\firmware_V1.0\Ezo_uart.h>
+// EZO IR Color sensor library.
+#include <C:\Users\lenovo\Documents\Uvon-Arduino-STM32F103RTC6\firmware_V1.0\Ezo_uart.h> 
+//Standard library.
 #include <stdio.h>
 #include <stdint.h>
 
-
+// Physical GPIO ports numbers.
 #define power 12
 #define LEDS 8
-#define SSR1 7
+#define SSR1 7  
 #define SSR2 6
 #define SSR3 5
 #define SSR4 4
@@ -17,10 +19,14 @@
 #define line_tresh 290
 int State = 0;
 int counter = 0;
-char inputString[100]; // input buffer for receiving commands
+char inputString[100]; // input buffer for receiving commands from Jetson nano
 bool stringComplete = false; // flag for command complete. true if received false otherwise
 bool stringComplete2 = false; // flag for command complete. true if received false otherwise
 
+bool Status_SSR_1 = false;//This varible check if the SSR turned on/off to blink LED's. 
+bool Status_SSR_2 = false;//This varible check if the SSR turned on/off to blink LED's. 
+bool couter_for_LED = false;
+int timer_for_LED_on_off =0;
 
 int a0,a1,a2,a3,a4;
 
@@ -30,7 +36,7 @@ int dirl = 0; // direction of left side wheels. if 1 CW else if 0 CCW
 int speedr = 0; // speed of right side wheels. Range [-255, 255]
 int speedl = 0; // speed of left side wheels. Range [-255, 255]
 
-int line = 0;
+int line = 0; // Line tracking status variable. If line is = to 1- in line tracking mode,if 0 - line tracking mode is off.
 
 
 char answer[20];
@@ -42,7 +48,7 @@ Ezo_uart rgb(Serial1);
 
 void setup() {
   // put your setup code here, to run once:
-  Serial2.begin(115200);
+  Serial2.begin(115200); 
   Serial3.begin(115200);
   Serial1.begin(9600);
   Serial.begin(9600);
@@ -85,8 +91,9 @@ void loop() {
   //Serial1.println("R\r");
   
   //Serial1.readBytes(sens_data,6);
- // Serial.print(sens_data);
+  // Serial.print(sens_data);
   command();
+  //Led_blink();
   if(line)
   {
     LineTracking();
@@ -164,24 +171,27 @@ void serialEvent2() {
     }
   }
 }
-
-
+//This function sends commands to MCB of rights pairs to drive wheels.
+//Q: you have declare the integer "id" but did't use it in "send_to_rdriver()" function, why?
 void send_to_rdriver(int id, int dir)
 {
-  char buf[10];
-  int first_byte = 235 - dir;
+  char buf[10];//The array of 10 for storeing the data that need to be send to motor controlling boards. 
+  int first_byte = 235 - dir;//what is first_byte ? it need to be "id-dir".
+  //The ^ (bitwise XOR) in C or C++ takes two numbers as operands and does XOR on every bit of two numbers. The result of XOR is 1 if the two bits are different.
+  //check_sum is a byte? that send to MCB to check if the received data is correct.
   int check_sum = first_byte ^ speedr;
-  sprintf(buf,"%c%c%c",first_byte ,speedr,check_sum);
-  Serial2.print(buf);
-  
-  delay(10);
+  sprintf(buf,"%c%c%c",first_byte ,speedr,check_sum);//stores the data in buffer- array of 10.
+  Serial2.print(buf);// Sends command via UART 2 port to MCB.
+  delay(10);// Wait 10 ms.
 
+  //Is this same for 2nd wheel ?
   first_byte = 232 + dir;
   check_sum = first_byte ^ speedr;
   sprintf(buf,"%c%c%c",first_byte ,speedr,check_sum);
   Serial2.print(buf);
   delay(10);
 }
+//This function sends commands to MCB of left pairs to drive wheels.
 void send_to_ldriver(int id, int dir)
 {
   char buf[10];
@@ -227,76 +237,77 @@ void LineTracking()
   #endif
 }
 void command()
-{
+{ //stringComplete is ture if some data form serial port (Jetson nano). Look on "void serialEvent(){}" function. 
   if(stringComplete)
-  {
+  {// inputString[] is an array where data is collected from serila port(Jetson nano).
+   // Statement above means > If first byte is not equal to "S". "S" command means that we need to send back the line position information. Look the end of command() function.
     if(inputString[0] != 'S')
-      Serial.print(inputString);
-    if(inputString[0] == 'M' && line == 0)
-    {
+      Serial.print(inputString);// Sends back received command.
+    if(inputString[0] == 'M' && line == 0)// if first byte is = to 'M' and line tracking is off.
+    { // sscanf() function is subtract the data parts of inputString and stores them into  dirr , speedr .... variables
+      // %d is type of the data that need to be subtracted form inputString. %d is signed decimal integer.
+      // "dirr" -is a direction of right pairs of wheels.
+      // "sppedr" -is a direction of left pairs of wheels.
+      // "dirl" and "speedl" are the same for left pairs.
       sscanf(inputString,"M%d,%d,%d,%d",&dirr,&speedr,&dirl,&speedl);
-      char buf[10];
+      char buf[10]; // why have you declare the buffer for MCB send data here?
 
       //Right Side First Motor
+      //send_to_rdriver(id_of_motor_controlling_board,direction) is function that sends data to motor controlling board that controls right pairs of wheels.
       send_to_rdriver(235,dirr);
+      //The same as send_to_rdriver but for left pairs.
       //Right Side Second Motor
       send_to_ldriver(232,dirl);
       
-    }
+    }// If first byte of command is "1" then turn on motors.
     else if(inputString[0] == '1')
-    {
-      digitalWrite(power, HIGH);
-      delay(50);
+    { 
+      digitalWrite(power, HIGH);// "power" is 12 pin connected to relay that turns on/off MCB's.
+      delay(50);//wait 15 ms.
       digitalWrite(power, LOW);
-      State = 1;
+      State = 1;// Changes on/off state to on.
       //Serial.println(inputString);
-    }
+      digitalWrite(LEDS, HIGH);//Turns on LED's.
+    }// If first byte of command is "0" then turn off motors.
     else if(inputString[0] == '2')
     {
       digitalWrite(power, HIGH);
       delay(50);
       digitalWrite(power, LOW);
-      State = 0;
-      //Serial.println(inputString);
-    }
-    else if(inputString[0] == '3')
-    {
-      digitalWrite(LEDS, HIGH);
-      //delay(10);
-      //Serial.println(inputString);
-    }
-    else if(inputString[0] == '4')
-    {
+      State = 0;//Turns off LED's.
       digitalWrite(LEDS, LOW);
-      //delay(10);
       //Serial.println(inputString);
-    }
+    }// if the command starts with "I" it regards to 1st SSR (DC SSR).
     else if(inputString[0] == 'I')
     {
-      if(inputString[1] == '1')
+      if(inputString[1] == '1')//if 2nd byte is 1 turn on.
       {
         digitalWrite(SSR1, HIGH);
+        Status_SSR_1 = true;
       }
-      else if(inputString[1] == '0')
+      else if(inputString[1] == '0')//if 2nd byte is 0 turn off.
       {
         digitalWrite(SSR1, LOW);
+        Status_SSR_1 = false;
       }
-    }
+    }// if the command starts with "U" it regards to 2nd SSR (AC SSR).
     else if(inputString[0] == 'U')
     {
-      if(inputString[1] == '1')
+      if(inputString[1] == '1')//if 2nd byte is 1 turn on.
       {
         digitalWrite(SSR2, HIGH);
+        Status_SSR_2 = true;
       }
-      else if(inputString[1] == '0')
+      else if(inputString[1] == '0')//if 2nd byte is 0 turn off.
       {
         digitalWrite(SSR2, LOW);
+        Status_SSR_2 = false;
+
       }
-    }
-    else if(inputString[0] == 'L')
+    }else if(inputString[0] == 'L')// If received 1st byte command is 'L'.
     {
       line = inputString[1] - '0';
-      if(line == 0)
+      if(line == 0)// And Second byte is 0. Ture off line tracking.
       {
         speedr = 1;
         speedl = 1;
@@ -308,15 +319,34 @@ void command()
         send_to_ldriver(232,dirl);
       }
     }
-    else if(inputString[0] == 'S')
+    else if(inputString[0] == 'S')// If "S" is received, send on "line" status.
     {
       if(a0 > line_tresh && a1 > line_tresh && a2 < line_tresh && a3 < line_tresh && a4 < line_tresh)
         Serial.print("1\n");
       else 
         Serial.print("0\n");
     }
+
    // Serial.print("\n");
     memset(inputString,0,strlen(inputString)); // Clears the command buffer
     stringComplete = false;  // Clears Command received flag
   }
+}
+void Led_blink(){
+   // When bouth SSR's are turned on start blinking LED's.
+   if(Status_SSR_1 && Status_SSR_2){
+     if(timer_for_LED_on_off >= 1000){
+     if(couter_for_LED){
+       digitalWrite(LEDS, HIGH);//Turn's on LED's.
+       couter_for_LED == false;
+       }else
+       {
+         digitalWrite(LEDS, LOW);//Turn's on LED's.
+         couter_for_LED = true;
+       }
+       timer_for_LED_on_off=0;
+     }
+     timer_for_LED_on_off++;
+   }
+
 }
