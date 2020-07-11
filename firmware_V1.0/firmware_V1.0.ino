@@ -14,7 +14,14 @@
 #define SSR4 4
 #define Current_Sensor_Analog_Input A5
 #define Distance_IR_Sensor_Level_1_Fornt_Right 26
+#define Distance_IR_Sensor_Level_1_Right 27
+#define Distance_IR_Sensor_Level_2_Fornt_Right 28
+#define Distance_IR_Sensor_Level_2_Back_Right 29
+
 #define Distance_IR_Sensor_Level_1_Fornt_Left 47
+#define Distance_IR_Sensor_Level_1_Left 46
+#define Distance_IR_Sensor_Level_2_Fornt_Left 45
+#define Distance_IR_Sensor_Level_2_Back_Left 44
 
 
 #define line_tresh 290
@@ -32,8 +39,17 @@ int timer_for_LED_on_off =0;
 
 int a0,a1,a2,a3,a4;
 int Num_for_Current_Sensor_Analog_Input;
+
 bool Num_Distance_IR_Sensor_Level_1_Fornt_Right;
+bool Num_Distance_IR_Sensor_Level_1_Right;
+bool Num_Distance_IR_Sensor_Level_2_Fornt_Right;
+bool Num_Distance_IR_Sensor_Level_2_Back_Right;
+
 bool Num_Distance_IR_Sensor_Level_1_Fornt_Left;
+bool Num_Distance_IR_Sensor_Level_1_Left;
+bool Num_Distance_IR_Sensor_Level_2_Fornt_Left;
+bool Num_Distance_IR_Sensor_Level_2_Back_Left;
+
 // For PID 
 long IR_sensors_average;
 int IR_sensors_sum;
@@ -89,8 +105,18 @@ void setup() {
   pinMode(A3,INPUT);
   pinMode(A4,INPUT);
   pinMode(Current_Sensor_Analog_Input,INPUT);             // Current mesuring sensor analog input.
-  pinMode(Distance_IR_Sensor_Level_1_Fornt_Left,INPUT);
+
   pinMode(Distance_IR_Sensor_Level_1_Fornt_Right,INPUT);
+  pinMode(Distance_IR_Sensor_Level_1_Right,INPUT);
+  pinMode(Distance_IR_Sensor_Level_2_Fornt_Right,INPUT);
+  pinMode(Distance_IR_Sensor_Level_2_Back_Right,INPUT);
+
+  pinMode(Distance_IR_Sensor_Level_1_Fornt_Left,INPUT);
+  pinMode(Distance_IR_Sensor_Level_1_Left,INPUT);
+  pinMode(Distance_IR_Sensor_Level_2_Fornt_Left,INPUT);
+  pinMode(Distance_IR_Sensor_Level_2_Back_Left,INPUT);
+
+  
 //rgb.init_module(0,0);
   
 /*reserve 200 bytes for the inputString:
@@ -136,8 +162,20 @@ void loop() {
   a3 = analogRead(A3);
   a4 = analogRead(A4);
   Num_for_Current_Sensor_Analog_Input = analogRead(A5);  
-  Num_Distance_IR_Sensor_Level_1_Fornt_Left = digitalRead(Distance_IR_Sensor_Level_1_Fornt_Left);
+
+
   Num_Distance_IR_Sensor_Level_1_Fornt_Right = digitalRead(Distance_IR_Sensor_Level_1_Fornt_Right);
+  Num_Distance_IR_Sensor_Level_1_Right = digitalRead(Distance_IR_Sensor_Level_1_Right);
+  Num_Distance_IR_Sensor_Level_2_Fornt_Right = digitalRead(Distance_IR_Sensor_Level_2_Fornt_Right);
+  Num_Distance_IR_Sensor_Level_2_Back_Right = digitalRead(Distance_IR_Sensor_Level_2_Back_Right);
+
+  Num_Distance_IR_Sensor_Level_1_Fornt_Left = digitalRead(Distance_IR_Sensor_Level_1_Fornt_Left);
+  Num_Distance_IR_Sensor_Level_1_Left = digitalRead(Distance_IR_Sensor_Level_1_Left);
+  Num_Distance_IR_Sensor_Level_2_Fornt_Left = digitalRead(Distance_IR_Sensor_Level_2_Fornt_Left);
+  Num_Distance_IR_Sensor_Level_2_Back_Left = digitalRead(Distance_IR_Sensor_Level_2_Back_Left);
+
+
+
 #if 0
   Serial.print(a0);
   Serial.print(" ");
@@ -155,11 +193,27 @@ Serial.print(Num_for_Current_Sensor_Analog_Input);
 Serial.print(" ");
 Serial.print('\n');
 #endif
-#if 1
-Serial.print(Num_Distance_IR_Sensor_Level_1_Fornt_Left);
-Serial.print(" ");
-Serial.print(Num_Distance_IR_Sensor_Level_1_Fornt_Right);
-Serial.print('\n');
+#if 0
+Serial.print("Level_1_Fornt_Right >>> ");
+Serial.println(Num_Distance_IR_Sensor_Level_1_Fornt_Right);
+Serial.print("Level_1_Right >>> ");
+Serial.println(Num_Distance_IR_Sensor_Level_1_Right);
+Serial.print("Level_2_Fornt_Right >>> ");
+Serial.println(Num_Distance_IR_Sensor_Level_2_Fornt_Right);
+Serial.print("Level_2_Fornt_Right >>> ");
+Serial.println(Num_Distance_IR_Sensor_Level_2_Fornt_Right);
+Serial.println("");
+
+Serial.print("Level_1_Fornt_Left >>> ");
+Serial.println(Num_Distance_IR_Sensor_Level_1_Fornt_Left);
+Serial.print("Level_1_Left >>> ");
+Serial.println(Num_Distance_IR_Sensor_Level_1_Left);
+Serial.print("Level_2_Fornt_Left >>> ");
+Serial.println(Num_Distance_IR_Sensor_Level_2_Fornt_Left);
+Serial.print("Level_2_Back_Left >>> ");
+Serial.println(Num_Distance_IR_Sensor_Level_2_Back_Left);
+Serial.println("");
+delay(1000);
 #endif
 }
 
