@@ -3,15 +3,14 @@
         {
             "name": "Win32",
             "includePath": [
+                "C:\\Users\\m_ara\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\**",
+                "C:\\Users\\m_ara\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.7.1\\**",
                 "C:\\Users\\lenovo\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\**",
                 "C:\\Users\\lenovo\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\sam\\1.6.12\\**",
                 "C:\\Users\\m_ara\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\sam\\1.6.12\\**",
                 "C:\\Users\\m_ara\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\**"
             ],
-            "forcedInclude": [
-                "C:\\Users\\lenovo\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\sam\\1.6.12\\cores\\arduino\\Arduino.h",
-                "C:\\Users\\m_ara\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\sam\\1.6.12\\cores\\arduino\\Arduino.h"
-            ],
+            "forcedInclude": [],
             "intelliSenseMode": "msvc-x64"
         }
     ],

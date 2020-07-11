@@ -34,6 +34,22 @@ int a0,a1,a2,a3,a4;
 int Num_for_Current_Sensor_Analog_Input;
 bool Num_Distance_IR_Sensor_Level_1_Fornt_Right;
 bool Num_Distance_IR_Sensor_Level_1_Fornt_Left;
+// For PID 
+long IR_sensors_average;
+int IR_sensors_sum;
+int IR_sensor_position;
+long sensors[] = {0, 0, 0, 0, 0};// Array used to store 5 readings for IR sensor module IR sensors. 
+int IR_proportional;
+int IR_setpiont = 2830;
+int IR_integral = 0;
+int IR_derivative = 0;
+int IR_last_proportional = 0;
+int IR_error_value = 0;
+double IR_Kp = 1;
+double IR_Ki = 0;
+double IR_Kd = 0;
+double IR_error_value_coificent = 0;
+
 
 int dirr = 0;                    // direction of right side wheels. if 1 CW else if 0 CCW
 int dirl = 0;                    // direction of left side wheels. if 1 CW else if 0 CCW
@@ -103,12 +119,15 @@ void loop() {
   Serial.print(sens_data);*/
   
   command();
-  Led_blink();
+  //Led_blink();
+  //PID_for_line_tracking_status();
   //overcurrent_check();
-  
+  //PID_alorithm();
   if(line)
   {
-    LineTracking();
+    PID_alorithm();
+    PID_calucate_turn_and_run_motors();
+    //LineTracking();
   }
 
   a0 = analogRead(A0);
@@ -136,7 +155,7 @@ Serial.print(Num_for_Current_Sensor_Analog_Input);
 Serial.print(" ");
 Serial.print('\n');
 #endif
-#if 0
+#if 1
 Serial.print(Num_Distance_IR_Sensor_Level_1_Fornt_Left);
 Serial.print(" ");
 Serial.print(Num_Distance_IR_Sensor_Level_1_Fornt_Right);
@@ -239,16 +258,16 @@ void LineTracking()
   dirr = 0;
   dirl = 0;
   if(a2 > line_tresh)
-    {
-      speedr = 30;
-      speedl = 15;
+    { dirl=1;
+      speedr = 40;
+      speedl = 40;
       send_to_rdriver(235,dirr); 
       send_to_ldriver(232,dirl);
     }
     else if(a3 > line_tresh)
-    {
-      speedr = 15;
-      speedl = 30;
+    { dirr = 1;
+      speedr = 40;
+      speedl = 40;
       send_to_rdriver(235,dirr); 
       send_to_ldriver(232,dirl);
     }
@@ -374,7 +393,7 @@ void command()
         }
       else 
       {
-        status_answer_to_Jetson_nano[0]="1";
+        status_answer_to_Jetson_nano[0]="0";
         status_answer_to_Jetson_nano[1]="|";
         for(int i=0;i<=14;i++)
         {
@@ -414,6 +433,106 @@ if(Num_for_Current_Sensor_Analog_Input >= 200){
         digitalWrite(SSR2, LOW);
         Status_SSR_2 = false;
 } 
+
+
+}
+void PID_for_line_tracking_status(){
+ #if 1 
+ IR_sensors_average = 0;
+ IR_sensors_sum = 0;
+ sensors[0]=a0;
+ sensors[1]=a1;
+ sensors[2]=a2;
+ sensors[3]=a3;
+ sensors[4]=a4;
+ for (int i = 0; i < 5; i++)
+ {
+        IR_sensors_average  += sensors[i] * (i+1) * 1000;        //Calculating the weighted mean
+        IR_sensors_sum += int(sensors[i]);                  //Calculating sum of sensor readings
+ }
+IR_sensor_position = int(IR_sensors_average / IR_sensors_sum);
+Serial.print(IR_sensors_average);
+Serial.print(' ');
+Serial.print(IR_sensors_sum);
+Serial.print(' ');
+Serial.print(IR_sensor_position);
+Serial.println();
+delay(1000);
+#endif
+}
+void PID_alorithm()
+{
+ #if 1
+  IR_sensors_average = 0;
+  IR_sensors_sum = 0;
+  sensors[0]=a0;
+  sensors[1]=a1;
+  sensors[2]=a2;
+  sensors[3]=a3;
+  sensors[4]=a4;
+ for (int i = 0; i < 5; i++)
+ {
+        IR_sensors_average  += sensors[i] * (i+1) * 1000;       //Calculating the weighted mean
+        IR_sensors_sum += int(sensors[i]);                  //Calculating sum of sensor readings
+ }
+ IR_sensor_position = int(IR_sensors_average / IR_sensors_sum);
+ IR_proportional = IR_sensor_position - IR_setpiont;        // Replace set_point by your set point
+ IR_integral = IR_integral +IR_proportional;
+ IR_derivative = IR_proportional -IR_last_proportional;
+ IR_last_proportional = IR_proportional;
+ 
+ IR_error_value = int(IR_proportional * IR_Kp + IR_integral * IR_Ki + IR_derivative * IR_Kd);
+ Serial.println(IR_error_value);
+ delay(300);
+ #endif
+
+}
+void PID_calucate_turn_and_run_motors()
+{   
+ if (IR_error_value < -145)
+ {
+    IR_error_value = -145;                                  //Restricting the error value between +600 -600
+
+ }                        
+ if (IR_error_value > 190)
+ {
+     IR_error_value = 190;
+ }
+
+ // If error_value is less than zero calculate right turn speed values
+ if (IR_error_value > -10 && IR_error_value < 190)
+ {    speedr = 0;
+      speedl = 0;
+      send_to_rdriver(235,dirr); 
+      send_to_ldriver(232,dirl);
+      delay(100);
+      dirr=0;
+      dirl=1;
+      speedr = 20 + (IR_error_value * IR_error_value_coificent);
+      speedl = 20 + (IR_error_value * IR_error_value_coificent);
+      send_to_rdriver(235,dirr); 
+      send_to_ldriver(232,dirl);
+ }else if(IR_error_value > -145 && IR_error_value < -25){ // Iferror_value is greater than zero calculate left turn values
+      speedr = 0;
+      speedl = 0;
+      send_to_rdriver(235,dirr); 
+      send_to_ldriver(232,dirl);
+      delay(100);
+      dirr=1;
+      dirl=0;
+      speedr = 20 + (IR_error_value * IR_error_value_coificent);
+      speedl = 20 + (IR_error_value * IR_error_value_coificent);
+      send_to_rdriver(235,dirr); 
+      send_to_ldriver(232,dirl);
+ }else{
+      dirr=0;
+      dirl=0;
+      speedr = 20;
+      speedl = 20;
+      send_to_rdriver(235,dirr); 
+      send_to_ldriver(232,dirl);
+ }
+
 
 
 }
